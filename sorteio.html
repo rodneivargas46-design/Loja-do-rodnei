@@ -1,44 +1,85 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
+    <title>Sorteio Atlantix</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sorteio Atlantix Restobar - Hambúrguer Grátis!</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background: #0a0a0a; color: #fff; padding: 20px; }
-        .container { max-width: 500px; margin: 0 auto; background: #1a1a1a; padding: 30px; border-radius: 15px; border: 2px solid #ffcc00; }
-        h1 { color: #ffcc00; font-size: 28px; }
-        .premio { font-size: 24px; margin: 20px 0; line-height: 1.4; }
-        .regras { text-align: left; background: #2a2a2a; padding: 20px; border-radius: 10px; margin: 20px 0; }
-        .regras p { margin: 12px 0; font-size: 16px; }
-        .botao { background: #ffcc00; color: #111; padding: 18px 35px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block; margin-top: 15px; font-size: 18px; }
-        .data { color: #ffcc00; font-size: 22px; margin: 20px 0; font-weight: bold; }
-        .local { font-size: 14px; color: #ccc; margin-top: 15px; }
+        body { font-family: Arial; background: linear-gradient(135deg, #ff6b35, #f7931e); margin: 0; padding: 20px; text-align: center; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        h1 { color: #ff6b35; }
+        input { width: 80%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; }
+        button { background: #ff6b35; color: white; padding: 12px 30px; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; }
+        #painelAdmin { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; }
+        .painel-conteudo { background: #1a1a1a; color: white; max-width: 600px; margin: 50px auto; padding: 20px; border-radius: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔥 SORTEIO ATLANTIX RESTOBAR 🔥</h1>
-        <p style="font-size:16px; margin-top:-10px;">Imbituba - SC</p>
-        
-        <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500" alt="Hambúrguer Artesanal Atlantix" style="width:100%; border-radius:10px; margin:15px 0;">
-        
-        <p class="premio">CONCORRA A 1 HAMBÚRGUER ARTESANAL<br><strong>SABOR SURPRESA DA CASA!</strong></p>
-        
-        <div class="regras">
-            <h2 style="color:#ffcc00; text-align:center;">Como Participar:</h2>
-            <p>1. ✅ Siga <strong>@atlantixrestobar</strong> no Instagram</p>
-            <p>2. ❤️ Curta o post oficial do sorteio</p>
-            <p>3. 📲 Compartilhe o post nos stories marcando <strong>@atlantixrestobar</strong></p>
-            <p>4. 💬 Comente "Eu quero" e marque 2 amigos</p>
-        </div>
-
-        <p class="data">SORTEIO DIA: 12/06/2026</p>
-
-        <a href="https://instagram.com/atlantixrestobar" class="botao" target="_blank">QUERO PARTICIPAR</a>
-        
-        <p class="local">📍 Rua João de Oliveira Filho, Imbituba<br>Ter a Sex: 18h às 23h | Sáb e Dom: 12h às 15h</p>
-        <p style="font-size:12px; margin-top:20px; color:#888;">*Promoção válida apenas no Instagram. Resultado nos stories do @atlantixrestobar.</p>
+        <h1>🔥 SORTEIO ATLANTIX 🔥</h1>
+        <p>Cadastre seu @ do Instagram e concorra!</p>
+        <input type="text" id="instagram" placeholder="@seuinstagram">
+        <button onclick="participar()">QUERO PARTICIPAR</button>
+        <p id="contador">0 pessoas participando</p>
+        <p id="msg"></p>
     </div>
+
+    <div id="painelAdmin">
+        <div class="painel-conteudo">
+            <h2>🔒 PAINEL DO SORTEIO - ADMIN</h2>
+            <p>Total: <span id="totalAdmin">0</span></p>
+            <div id="listaAdmin" style="max-height: 200px; overflow-y: auto; background: #333; padding: 10px; margin: 10px 0;"></div>
+            <button onclick="sortear()" style="background: #00c851;">🎲 SORTEAR AGORA</button>
+            <button onclick="fecharPainel()" style="background: #ff4444;">FECHAR</button>
+            <h3 id="resultado"></h3>
+        </div>
+    </div>
+
+    <script>
+        let participantes = JSON.parse(localStorage.getItem('sorteio_atlantix')) || [];
+        
+        function atualizarContador() {
+            document.getElementById('contador').textContent = participantes.length + ' pessoas participando';
+            document.getElementById('totalAdmin').textContent = participantes.length;
+        }
+        
+        function participar() {
+            const insta = document.getElementById('instagram').value.trim();
+            if (!insta) { alert('Digite seu @'); return; }
+            if (!insta.startsWith('@')) { alert('Comece com @'); return; }
+            if (participantes.includes(insta)) { alert('Você já está participando!'); return; }
+            participantes.push(insta);
+            localStorage.setItem('sorteio_atlantix', JSON.stringify(participantes));
+            document.getElementById('msg').textContent = '✅ Cadastrado com sucesso!';
+            document.getElementById('instagram').value = '';
+            atualizarContador();
+        }
+        
+        function sortear() {
+            if (participantes.length === 0) { alert('Ninguém cadastrado'); return; }
+            const sorteado = participantes[Math.floor(Math.random() * participantes.length)];
+            document.getElementById('resultado').innerHTML = '🎉 GANHADOR: ' + sorteado + ' 🎉';
+        }
+        
+        function fecharPainel() {
+            document.getElementById('painelAdmin').style.display = 'none';
+        }
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'A') {
+                const senha = prompt('Digite a senha de admin:');
+                if (senha === 'atlantix2026') {
+                    document.getElementById('painelAdmin').style.display = 'block';
+                    let lista = '';
+                    participantes.forEach(p => lista += p + '<br>');
+                    document.getElementById('listaAdmin').innerHTML = lista || 'Nenhum participante';
+                } else {
+                    alert('Senha incorreta');
+                }
+            }
+        });
+        
+        atualizarContador();
+    </script>
 </body>
 </html>
